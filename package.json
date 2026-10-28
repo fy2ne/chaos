@@ -1,0 +1,56 @@
+{
+  "name": "@weavetab/plugin-chaos",
+  "version": "1.0.0",
+  "description": "Official Weavetab Chaos Engineering & Fault Injection Plugin. CDP network throttling, CPU slowdown, API fault mocking, DOM boundary fuzzing, and automated crash telemetry.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "weavetab.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@weavetab/sdk": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "weavetab",
+    "weavetab-plugin",
+    "weavetab-official",
+    "chaos",
+    "cdp",
+    "fault-injection",
+    "fuzzer",
+    "race-condition",
+    "wt-chaos"
+  ],
+  "author": {
+    "name": "fy2ne",
+    "url": "https://fy2ne.me"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fy2ne/chaos.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

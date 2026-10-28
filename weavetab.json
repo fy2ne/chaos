@@ -1,0 +1,155 @@
+{
+  "$schema": "https://weavetab.dev/schema/plugin.json",
+  "name": "@weavetab/plugin-chaos",
+  "displayName": "Chaos",
+  "version": "1.0.0",
+  "description": "Official Weavetab Chaos Engineering & Fault Injection Plugin. CDP network throttling, CPU slowdown, API fault mocking, DOM boundary fuzzing, and automated crash telemetry.",
+  "entry": "dist/index.js",
+  "engines": {
+    "weavetab": "^2.5.1",
+    "node": ">=18.0.0"
+  },
+  "environments": [
+    "mcp"
+  ],
+  "authors": [
+    {
+      "name": "fy2ne",
+      "role": "Author",
+      "url": "https://fy2ne.me"
+    }
+  ],
+  "license": "MIT",
+  "tags": [
+    "Chaos",
+    "CDP",
+    "Network",
+    "Fuzzing",
+    "Testing",
+    "Official"
+  ],
+  "links": {
+    "github": "https://github.com/fy2ne/chaos",
+    "npm": "https://www.npmjs.com/package/@weavetab/plugin-chaos"
+  },
+  "defaultConfig": {
+    "autoListen": true,
+    "maxLogEntries": 100
+  },
+  "permissions": {
+    "cdp": {
+      "evaluate": true,
+      "network": true,
+      "reason": "Emulates network conditions, throttles CPU rate, intercepts requests via Fetch, and injects boundary payloads into DOM elements."
+    },
+    "tools": {
+      "add": true,
+      "reason": "Registers the chaos_inject, chaos_fuzz, and chaos_report MCP tools."
+    }
+  },
+  "tools": [
+    {
+      "name": "chaos_inject",
+      "description": "Runtime environmental fault injection over CDP. Emulates network throttling (offline/slow_3g/fast_3g/custom latency), CPU execution throttling (4x/6x slowdown), and API fault mocking (status codes, connection failures, custom responses via CDP Fetch).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["apply", "reset"],
+            "description": "Whether to apply faults or reset environmental conditions back to normal (default: 'apply')."
+          },
+          "network_profile": {
+            "type": "string",
+            "enum": ["offline", "slow_3g", "fast_3g", "custom", "reset"],
+            "description": "Pre-configured network degradation profile or 'reset' to restore unthrottled network."
+          },
+          "latency_ms": {
+            "type": "number",
+            "description": "Additional latency in milliseconds for custom network profile (e.g. 500)."
+          },
+          "download_kbps": {
+            "type": "number",
+            "description": "Max download throughput in kbps for custom network profile (e.g. 250)."
+          },
+          "upload_kbps": {
+            "type": "number",
+            "description": "Max upload throughput in kbps for custom network profile (e.g. 100)."
+          },
+          "cpu_throttle_rate": {
+            "type": "number",
+            "description": "CPU throttling multiplier (e.g. 1 for normal, 4 for 4x slowdown, 6 for 6x slowdown)."
+          },
+          "mock_api": {
+            "type": "object",
+            "properties": {
+              "url_pattern": {
+                "type": "string",
+                "description": "URL glob pattern to intercept (e.g. '*api/checkout*' or '*user*')."
+              },
+              "status_code": {
+                "type": "number",
+                "description": "HTTP status code to return (e.g. 500, 502, 503, 429)."
+              },
+              "response_body": {
+                "type": "string",
+                "description": "Mocked JSON or text payload to return in response body."
+              },
+              "fail_reason": {
+                "type": "string",
+                "enum": ["Failed", "Aborted", "TimedOut", "ConnectionReset"],
+                "description": "Connection-level failure reason instead of HTTP status."
+              }
+            },
+            "description": "CDP Fetch API fault interception rules."
+          }
+        }
+      }
+    },
+    {
+      "name": "chaos_fuzz",
+      "description": "Autonomous boundary testing and race-condition generator on forms and buttons. Executes rapid multi-clicks to trigger race conditions and injects boundary payloads (oversized, unicode edge, numeric bounds, injection probes) into DOM inputs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": ["race_click", "boundary_forms", "all"],
+            "description": "Fuzzing mode: 'race_click' fires rapid concurrent clicks, 'boundary_forms' injects edge-case values, 'all' runs both."
+          },
+          "selector": {
+            "type": "string",
+            "description": "Target CSS selector (e.g. 'button.submit', 'form#signup', or 'input'). Defaults to form or button inside body."
+          },
+          "burst_count": {
+            "type": "number",
+            "description": "Number of rapid consecutive clicks to dispatch for race-condition testing (default: 20)."
+          },
+          "payload_type": {
+            "type": "string",
+            "enum": ["all", "oversized", "unicode_edge", "numeric_bounds", "injection_probe"],
+            "description": "Type of boundary value payload to inject into inputs (default: 'all')."
+          },
+          "auto_submit": {
+            "type": "boolean",
+            "description": "Whether to automatically trigger submit button click or form submission after injecting boundary inputs."
+          }
+        }
+      }
+    },
+    {
+      "name": "chaos_report",
+      "description": "Captures CDP Runtime exceptions, network error codes (>= 400), and failed requests to generate structured Markdown bug reports with exact reproduction steps.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["report", "start", "clear"],
+            "description": "Operation: 'report' outputs Markdown bug report, 'start' attaches error listeners to current tab, 'clear' resets captured events."
+          }
+        }
+      }
+    }
+  ]
+}
