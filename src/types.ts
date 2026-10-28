@@ -12,6 +12,7 @@ export interface MockApiRule {
   status_code?: number;
   response_body?: string;
   fail_reason?: "Failed" | "Aborted" | "TimedOut" | "ConnectionReset";
+  delay_ms?: number;
 }
 
 export interface ChaosInjectArgs {
@@ -33,10 +34,13 @@ export interface ChaosFuzzArgs {
   burst_count?: number;
   payload_type?: PayloadKind;
   auto_submit?: boolean;
+  shadow_dom?: boolean;
+  key_events?: boolean;
 }
 
 export interface ChaosReportArgs {
   action?: "report" | "start" | "clear";
+  format?: "markdown" | "json";
 }
 
 export interface CapturedException {

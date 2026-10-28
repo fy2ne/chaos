@@ -184,6 +184,22 @@ export async function handleReportAction(sess: any, args: ChaosReportArgs): Prom
     } catch {}
   }
 
+  if (args.format === "json") {
+    return {
+      success: true,
+      timestamp: new Date().toISOString(),
+      targetUrl: currentUrl,
+      summary: {
+        exceptions: capturedExceptions.length,
+        networkFaults: capturedFaults.length,
+        reproSteps: reproSteps.length,
+      },
+      reproSteps: [...reproSteps],
+      exceptions: [...capturedExceptions],
+      networkFaults: [...capturedFaults],
+    };
+  }
+
   const report = generateMarkdownReport(currentUrl);
   return {
     success: true,

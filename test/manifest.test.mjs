@@ -78,7 +78,7 @@ test("chaosPlugin compiles and registers all 3 tools in PluginContext", async ()
     Runtime: {
       enable: async () => {},
       evaluate: async () => ({
-        result: { value: { raceClicks: 15, inputsFuzzed: 2, submitted: false } },
+        result: { value: { raceClicks: 15, inputsFuzzed: 2, keyEventsFired: 4, submitted: false } },
       }),
     },
     Log: {
@@ -94,20 +94,38 @@ test("chaosPlugin compiles and registers all 3 tools in PluginContext", async ()
     off: () => {},
   };
 
-  // 1. Test chaos_inject
+  // 1. Test chaos_inject with mock delay
   const injectTool = registered.get("chaos_inject");
-  const injectRes = await injectTool.handler({ network_profile: "slow_3g", cpu_throttle_rate: 4 }, mockSession);
+  const injectRes = await injectTool.handler({
+    network_profile: "slow_3g",
+    cpu_throttle_rate: 4,
+    mock_api: { url_pattern: "*checkout*", status_code: 500, delay_ms: 100 },
+  }, mockSession);
   assert.ok(injectRes.content[0].text.includes("slow_3g"));
   assert.ok(injectRes.content[0].text.includes("4x slowdown"));
+  assert.ok(injectRes.content[0].text.includes("delayMs"));
 
-  // 2. Test chaos_fuzz
+  // 2. Test chaos_fuzz with shadow_dom and key_events
   const fuzzTool = registered.get("chaos_fuzz");
-  const fuzzRes = await fuzzTool.handler({ mode: "race_click", burst_count: 15 }, mockSession);
+  const fuzzRes = await fuzzTool.handler({
+    mode: "race_click",
+    burst_count: 15,
+    shadow_dom: true,
+    key_events: true,
+  }, mockSession);
   assert.ok(fuzzRes.content[0].text.includes("raceClicks"));
+  assert.ok(fuzzRes.content[0].text.includes("keyEventsFired"));
 
-  // 3. Test chaos_report
+  // 3. Test chaos_report with markdown format
   const reportTool = registered.get("chaos_report");
-  const reportRes = await reportTool.handler({ action: "report" }, mockSession);
-  assert.ok(reportRes.content[0].text.includes("# Chaos Engineering Telemetry & Bug Report"));
-  assert.ok(reportRes.content[0].text.includes("https://example.com/checkout"));
+  const reportMd = await reportTool.handler({ action: "report", format: "markdown" }, mockSession);
+  assert.ok(reportMd.content[0].text.includes("# Chaos Engineering Telemetry & Bug Report"));
+  assert.ok(reportMd.content[0].text.includes("https://example.com/checkout"));
+
+  // 4. Test chaos_report with json format
+  const reportJson = await reportTool.handler({ action: "report", format: "json" }, mockSession);
+  const parsed = JSON.parse(reportJson.content[0].text);
+  assert.equal(parsed.success, true);
+  assert.ok(parsed.summary);
+  assert.ok(Array.isArray(parsed.reproSteps));
 });

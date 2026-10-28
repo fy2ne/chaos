@@ -80,7 +80,7 @@ export async function applyChaosFaults(sess: any, args: ChaosInjectArgs): Promis
       throw new Error("cdp Fetch domain missing on session");
     }
 
-    const { url_pattern, status_code, response_body, fail_reason } = args.mock_api;
+    const { url_pattern, status_code, response_body, fail_reason, delay_ms } = args.mock_api;
     const pat = url_pattern || "*";
 
     // detach existing handler if already hooked
@@ -95,6 +95,10 @@ export async function applyChaosFaults(sess: any, args: ChaosInjectArgs): Promis
 
     const handler = async (evt: any) => {
       try {
+        if (delay_ms && delay_ms > 0) {
+          await new Promise((r) => setTimeout(r, delay_ms));
+        }
+
         if (fail_reason) {
           await sess.Fetch.failRequest({
             requestId: evt.requestId,
@@ -130,8 +134,9 @@ export async function applyChaosFaults(sess: any, args: ChaosInjectArgs): Promis
       pattern: pat,
       status: status_code,
       reason: fail_reason,
+      delayMs: delay_ms || 0,
     };
-    recordStep("chaos_inject:mock_api", `pattern=${pat} status=${status_code || "n/a"} failReason=${fail_reason || "n/a"}`);
+    recordStep("chaos_inject:mock_api", `pattern=${pat} status=${status_code || "n/a"} delay=${delay_ms || 0}ms`);
   }
 
   return { status: "applied", applied };
