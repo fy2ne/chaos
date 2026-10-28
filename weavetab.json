@@ -1,9 +1,9 @@
 {
   "$schema": "https://weavetab.dev/schema/plugin.json",
-  "name": "@weavetab/plugin-chaos",
+  "name": "wt-choas",
   "displayName": "Chaos",
   "version": "1.0.0",
-  "description": "Official Weavetab Chaos Engineering & Fault Injection Plugin. CDP network throttling, CPU slowdown, API fault mocking, DOM boundary fuzzing, and automated crash telemetry.",
+  "description": "Browser chaos engineering and fault injection plugin for Weavetab by fy2ne. CDP network throttling, CPU slowdown, API fault mocking, DOM boundary fuzzing, and automated crash telemetry.",
   "entry": "dist/index.js",
   "engines": {
     "weavetab": "^2.5.1",
@@ -26,11 +26,11 @@
     "Network",
     "Fuzzing",
     "Testing",
-    "Official"
+    "Community"
   ],
   "links": {
     "github": "https://github.com/fy2ne/chaos",
-    "npm": "https://www.npmjs.com/package/@weavetab/plugin-chaos"
+    "npm": "https://www.npmjs.com/package/wt-choas"
   },
   "defaultConfig": {
     "autoListen": true,

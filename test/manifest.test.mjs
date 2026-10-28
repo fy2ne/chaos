@@ -13,7 +13,7 @@ test("weavetab.json matches manifest schema and permissions", () => {
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
   assert.equal(manifest.displayName, "Chaos");
-  assert.equal(manifest.name, "@weavetab/plugin-chaos");
+  assert.equal(manifest.name, "wt-choas");
   assert.equal(manifest.version, "1.0.0");
   assert.equal(manifest.license, "MIT");
 

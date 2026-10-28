@@ -9,9 +9,9 @@ export * from "./fuzzer.js";
 export * from "./reporter.js";
 
 export const chaosPlugin = definePlugin({
-  name: "@weavetab/plugin-chaos",
+  name: "wt-choas",
   version: "1.0.0",
-  description: "Official Weavetab Chaos Engineering & Fault Injection Plugin.",
+  description: "Browser chaos engineering and fault injection plugin for Weavetab by fy2ne.",
 
   defaultConfig: {
     autoListen: true,
