@@ -66,8 +66,11 @@ export async function runChaosFuzz(sess: any, args: ChaosFuzzArgs): Promise<Reco
           for (let i = 0; i < burst; i++) {
             targetBtn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
             targetBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-            targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-            if (typeof targetBtn.click === 'function') targetBtn.click();
+            if (typeof targetBtn.click === 'function') {
+              targetBtn.click();
+            } else {
+              targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }
             log.raceClicks++;
 
             if (keyEvents) {
@@ -82,7 +85,7 @@ export async function runChaosFuzz(sess: any, args: ChaosFuzzArgs): Promise<Reco
       // 2. Boundary form injection
       if (mode === 'boundary_forms' || mode === 'all') {
         const root = sel ? (document.querySelector(sel) || document) : document;
-        const fieldQuery = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, [contenteditable="true"]';
+        const fieldQuery = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select, [contenteditable="true"]';
         const fields = collectNodes(root, fieldQuery);
 
         for (const f of fields) {
@@ -101,9 +104,18 @@ export async function runChaosFuzz(sess: any, args: ChaosFuzzArgs): Promise<Reco
             valToInject = allTypes[Math.floor(Math.random() * allTypes.length)];
           }
 
-          if (f.hasAttribute('contenteditable')) {
+          if (f.tagName.toLowerCase() === 'select') {
+            const opts = f.options;
+            if (opts && opts.length > 0) {
+              f.selectedIndex = Math.floor(Math.random() * opts.length);
+              f.dispatchEvent(new Event('input', { bubbles: true }));
+              f.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          } else if (f.hasAttribute('contenteditable')) {
             f.innerText = valToInject;
             f.dispatchEvent(new Event('input', { bubbles: true }));
+            f.dispatchEvent(new Event('change', { bubbles: true }));
+            f.dispatchEvent(new Event('blur', { bubbles: true }));
           } else {
             setVal(f, valToInject);
           }

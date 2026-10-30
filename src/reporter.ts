@@ -8,6 +8,7 @@ import type {
 const capturedExceptions: CapturedException[] = [];
 const capturedFaults: CapturedNetworkFault[] = [];
 const reproSteps: ReproStep[] = [];
+const requestMap = new Map<string, { url: string; method?: string }>();
 const hookedSessions = new WeakSet<any>();
 
 export function recordStep(action: string, details: string): void {
@@ -45,15 +46,29 @@ export async function attachTelemetryListeners(sess: any): Promise<void> {
     if (capturedExceptions.length > 100) capturedExceptions.shift();
   });
 
+  sess.on("Network.requestWillBeSent", (evt: any) => {
+    if (evt?.requestId && evt?.request?.url) {
+      requestMap.set(evt.requestId, {
+        url: evt.request.url,
+        method: evt.request.method,
+      });
+      if (requestMap.size > 200) {
+        const first = requestMap.keys().next().value;
+        if (first) requestMap.delete(first);
+      }
+    }
+  });
+
   sess.on("Network.responseReceived", (evt: any) => {
     const res = evt?.response;
     if (res && res.status >= 400) {
+      const knownReq = evt?.requestId ? requestMap.get(evt.requestId) : undefined;
       capturedFaults.push({
         ts: Date.now(),
-        url: res.url,
+        url: res.url || knownReq?.url || "request",
         status: res.status,
         statusText: res.statusText,
-        method: res.requestHeaders?.method || "GET",
+        method: knownReq?.method || res.requestHeaders?.method || "GET",
       });
       if (capturedFaults.length > 100) capturedFaults.shift();
     }
@@ -61,9 +76,11 @@ export async function attachTelemetryListeners(sess: any): Promise<void> {
 
   sess.on("Network.loadingFailed", (evt: any) => {
     if (evt?.canceled) return;
+    const knownReq = evt?.requestId ? requestMap.get(evt.requestId) : undefined;
     capturedFaults.push({
       ts: Date.now(),
-      url: evt?.requestId || "request",
+      url: knownReq?.url || evt?.requestId || "request",
+      method: knownReq?.method,
       failedReason: evt?.errorText || "NetConnectionFailed",
     });
     if (capturedFaults.length > 100) capturedFaults.shift();
@@ -87,6 +104,7 @@ export function clearTelemetry(): void {
   capturedExceptions.length = 0;
   capturedFaults.length = 0;
   reproSteps.length = 0;
+  requestMap.clear();
 }
 
 export function generateMarkdownReport(targetUrl?: string): string {

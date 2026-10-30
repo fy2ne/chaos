@@ -2,7 +2,7 @@
 
 Browser chaos engineering and fault injection plugin for Weavetab by [fy2ne](https://fy2ne.me).
 
-Direct CDP Layer 0 network degradation, CPU throttling, API mocking, boundary form & race-condition fuzzing, and automated crash telemetry reporting.
+Direct CDP network degradation, CPU throttling, API mocking, boundary form & race-condition fuzzing, and automated crash telemetry reporting.
 
 ## Features
 

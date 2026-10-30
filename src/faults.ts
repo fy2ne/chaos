@@ -115,6 +115,9 @@ export async function applyChaosFaults(sess: any, args: ChaosInjectArgs): Promis
             responseHeaders: [
               { name: "Content-Type", value: "application/json" },
               { name: "X-Chaos-Injected", value: "true" },
+              { name: "Access-Control-Allow-Origin", value: "*" },
+              { name: "Access-Control-Allow-Methods", value: "*" },
+              { name: "Access-Control-Allow-Headers", value: "*" },
             ],
             body: Buffer.from(bodyPayload).toString("base64"),
           });

@@ -1,6 +1,6 @@
 {
   "name": "wt-choas",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Browser chaos engineering and fault injection plugin for Weavetab by fy2ne. CDP network throttling, CPU slowdown, API fault mocking, DOM boundary fuzzing, and automated crash telemetry.",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@weavetab/sdk": "^2.5.1"
+    "@weavetab/sdk": "^2.5.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

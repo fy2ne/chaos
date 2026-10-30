@@ -10,7 +10,7 @@ export * from "./reporter.js";
 
 export const chaosPlugin = definePlugin({
   name: "wt-choas",
-  version: "1.0.0",
+  version: "1.1.0",
   description: "Browser chaos engineering and fault injection plugin for Weavetab by fy2ne.",
 
   defaultConfig: {

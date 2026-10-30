@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weavetab Chaos Testbed</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Weavetab Chaos Testbed</h1>
+  
+  <div class="box">
+    <h2>Form Boundary Fuzzing</h2>
+    <form id="chaosForm" onsubmit="event.preventDefault(); window.__formSubmitted = true;">
+      <div>
+        <label>Username: <input type="text" id="userInput" name="username" /></label>
+      </div>
+      <div>
+        <label>Quantity: <input type="number" id="qtyInput" name="quantity" /></label>
+      </div>
+      <div>
+        <label>Description: <textarea id="descInput" name="description"></textarea></label>
+      </div>
+      <div id="editor" contenteditable="true" style="border:1px solid #999; min-height:30px; margin: 5px 0;">Editable content</div>
+      <button type="submit" id="submitBtn">Submit Form</button>
+    </form>
+  </div>
+
+  <div class="box">
+    <h2>Race Condition Click Target</h2>
+    <button id="raceBtn" type="button">Fast Click Me</button>
+    <p>Click count: <span id="clickCount">0</span></p>
+  </div>
+
+  <div class="box">
+    <h2>API Fetch Interception Test</h2>
+    <button id="fetchBtn" type="button">Trigger Fetch /api/data</button>
+    <div id="fetchResult">Idle</div>
+  </div>
+
+  <div class="box">
+    <h2>Runtime Error Trigger</h2>
+    <button id="crashBtn" type="button" onclick="throw new Error('Simulated UI crash in button handler')">Trigger Uncaught Error</button>
+    <button id="consoleErrBtn" type="button" onclick="console.error('Simulated console.error event')">Trigger console.error</button>
+  </div>
+
+  <div class="box">
+    <h2>Shadow DOM Test</h2>
+    <div id="shadowHost"></div>
+  </div>
+
+  <script>
+    let clicks = 0;
+    const raceBtn = document.getElementById('raceBtn');
+    const clickCount = document.getElementById('clickCount');
+    raceBtn.addEventListener('click', () => {
+      clicks++;
+      clickCount.innerText = clicks;
+    });
+
+    const fetchBtn = document.getElementById('fetchBtn');
+    const fetchResult = document.getElementById('fetchResult');
+    fetchBtn.addEventListener('click', async () => {
+      fetchResult.innerText = 'Fetching...';
+      try {
+        const res = await fetch('/api/data');
+        if (!res.ok) {
+          fetchResult.innerText = 'HTTP Error: ' + res.status;
+          return;
+        }
+        const data = await res.json();
+        fetchResult.innerText = 'Data: ' + JSON.stringify(data);
+      } catch (err) {
+        fetchResult.innerText = 'Network Caught: ' + err.message;
+      }
+    });
+
+    // Shadow DOM setup
+    const host = document.getElementById('shadowHost');
+    const shadow = host.attachShadow({ mode: 'open' });
+    shadow.innerHTML = `
+      <form id="shadowForm">
+        <label>Shadow Input: <input type="text" id="shadowInput" name="shadowField" /></label>
+        <button type="button" id="shadowBtn">Shadow Action</button>
+      </form>
+    `;
+  </script>
+</body>
+</html>
