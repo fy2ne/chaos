@@ -10,7 +10,7 @@ export * from "./reporter.js";
 
 export const chaosPlugin = definePlugin({
   name: "wt-choas",
-  version: "1.1.0",
+  version: "1.2.0",
   description: "Browser chaos engineering and fault injection plugin for Weavetab by fy2ne.",
 
   defaultConfig: {
@@ -46,14 +46,13 @@ export const chaosPlugin = definePlugin({
             .optional()
             .describe("CDP Fetch API fault interception rules"),
         },
-        handler: async (args, session) => {
+        handler: async (args, rawCtx: any) => {
+          const session = rawCtx?.tab?.session || rawCtx?.session || rawCtx;
           if (autoListen && session) {
             await attachTelemetryListeners(session);
           }
           const res = await applyChaosFaults(session, args);
-          return {
-            content: [{ type: "text", text: JSON.stringify(res, null, 2) }],
-          };
+          return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
         },
       })
     );
@@ -74,14 +73,13 @@ export const chaosPlugin = definePlugin({
           shadow_dom: z.boolean().optional().describe("Whether to recursively traverse and fuzz Shadow DOM elements (default: true)"),
           key_events: z.boolean().optional().describe("Whether to fire synthetic keyboard events (Enter/Tab) during clicks and input mutations"),
         },
-        handler: async (args, session) => {
+        handler: async (args, rawCtx: any) => {
+          const session = rawCtx?.tab?.session || rawCtx?.session || rawCtx;
           if (autoListen && session) {
             await attachTelemetryListeners(session);
           }
           const res = await runChaosFuzz(session, args);
-          return {
-            content: [{ type: "text", text: JSON.stringify(res, null, 2) }],
-          };
+          return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
         },
       })
     );
@@ -97,12 +95,11 @@ export const chaosPlugin = definePlugin({
           action: z.enum(["report", "start", "clear"]).optional().describe("Operation: report (default), start, or clear"),
           format: z.enum(["markdown", "json"]).optional().describe("Output format: markdown (default) or machine-readable json"),
         },
-        handler: async (args, session) => {
+        handler: async (args, rawCtx: any) => {
+          const session = rawCtx?.tab?.session || rawCtx?.session || rawCtx;
           const res = await handleReportAction(session, args);
           const out = res.reportMarkdown ? res.reportMarkdown : JSON.stringify(res, null, 2);
-          return {
-            content: [{ type: "text", text: out }],
-          };
+          return { content: [{ type: "text", text: out }] };
         },
       })
     );

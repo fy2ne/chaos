@@ -23,7 +23,7 @@ export function recordStep(action: string, details: string): void {
 }
 
 export async function attachTelemetryListeners(sess: any): Promise<void> {
-  if (!sess || hookedSessions.has(sess)) return;
+  if (!sess || hookedSessions.has(sess) || typeof sess.on !== "function") return;
   hookedSessions.add(sess);
 
   try {
